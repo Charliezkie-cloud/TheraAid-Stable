@@ -9,11 +9,22 @@ if(isset($_SESSION["appointment_id"])){
     $var_appid = $_SESSION["appointment_id"];
 }
 
+if (isset($_POST["session_id"])) {
+    $session_id = $_POST["session_id"];
+
+    $sql = "SELECT * FROM `tbl_session` WHERE session_id = $session_id";
+
+    $result = $var_conn->query($sql)->fetch_assoc();
+
+    echo $result["photo"];
+    exit;
+}
+
 date_default_timezone_set('Asia/Manila');
 
 $var_crrntTime = date("h:i:sa");
 $var_currntDate = date("Y-m-d");
-$var_currntDate = "2024-11-13";
+// $var_currntDate = "2024-11-13";
 
 $var_sessionList = "SELECT 
                     	*,
@@ -164,6 +175,10 @@ $var_sessID = "";
                             <label class="mb-1">Images:</label><br>
                             <input type="file" class="form-control" name="FilePoto" multiple accept="image/*" required>
                         </div>
+                        <div class="d-flex justify-content-center align-items-center flex-column d-block mb-3" id="photoContainer">
+                            <small class="fw-semibold mb-2">Session Pictures</small>
+                            <!-- <img src="./UserFiles/SessionPictures/" id="sessionPicturesPreview" class="img-thumbnail" style="height: 250px; width: auto; object-fit: cover;"> -->
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -258,10 +273,7 @@ $var_sessID = "";
 
                     <hr>
 
-                    <div class="d-flex justify-content-center align-items-center gap-2">
-                        <button type="button" class="btn btn-outline-primary rounded-5 w-100 shadow" id="genCertificateBtn" data-bs-target="#viewCertificateModal" data-bs-toggle="modal" disabled>Generate Certificate</button>
-                        <button type="button" class="btn btn-outline-primary rounded-5 w-100 shadow" id="feedbackBtn">Feedback</button>
-                    </div>
+                    <button type="button" class="btn btn-outline-primary rounded-5 w-100 shadow" id="genCertificateBtn" data-bs-target="#viewCertificateModal" data-bs-toggle="modal" disabled>Generate Certificate</button>
 
                     <hr class="d-block d-lg-none">
 
@@ -289,7 +301,7 @@ $var_sessID = "";
                     
                         $var_note = $var_Sesget["note"];
                         $var_sessID = $var_Sesget["session_id"];
-                        $num_of_session = intval($var_Sesget["num_of_session"]);
+                        $num_of_session = $var_Sesget["num_of_session"];
                         $formatted_date_created = $var_Sesget["formatted_date_created"];
                         $status = $var_Sesget["status"];
                     
@@ -305,7 +317,7 @@ $var_sessID = "";
                         </button>";
                     }
 
-                    if ($index >= $num_of_session) {
+                    if (!($index >= $num_of_session)) {
                         $isDisabled = true;
                     }
 
@@ -324,12 +336,20 @@ $var_sessID = "";
     <script>
          window.addEventListener("DOMContentLoaded", () => {
 
+            const imgs = document.getElementsByTagName("img");
+
+            Array.from(imgs).forEach((img) => {
+                img.addEventListener("click", (e) => {
+                    window.open(img.src);
+                });
+            });
+
             const genCertificateBtn = document.getElementById('genCertificateBtn');
 
             <?php
 
             if ($isDisabled) {
-                echo "genCertificateBtn.disabled = false";
+                echo "genCertificateBtn.disabled = true";
             }
 
             ?>
@@ -449,9 +469,31 @@ $var_sessID = "";
             }
         });
 
-        function openSessionModal(sessionId, note) {
+        async function openSessionModal(sessionId, note) {
             editSessionForm.sessionID.value = sessionId;
             editSessionForm.TxtNote.value = note;
+
+            const formData = new FormData();
+            formData.append("session_id", sessionId);
+
+            const response = await fetch("./TherapistCreateSession.php", {
+                method: "POST",
+                body: formData
+            });
+
+            const photos = await response.text();
+            const photosArray = photos.split(",");
+            const photoContainer = document.getElementById("photoContainer");
+
+            for (let photo of photosArray) {
+                photoContainer.innerHTML += `<img src='./UserFiles/SessionPictures/${photo}' class='img-thumbnail' style='height: 250px; width: auto; object-fit: cover; margin-right: 10px; cursor: pointer;'>`;
+            }
+
+            Array.from(photoContainer.getElementsByTagName("img")).forEach((img) => {
+                img.addEventListener("click", (e) => {
+                    window.open(img.src);
+                });
+            });
         }
     
         function showToast(message) {

@@ -6,7 +6,8 @@ session_start();
 
 $var_UserId = $_SESSION["sess_id"];
 
-$var_crrntDate = date("Y-m-d");
+// $var_crrntDate = date("Y-m-d");
+$var_crrntDate = "2024-11-13";
 $var_validate = "";
 
 $var_Rmndr = "SELECT RM.reminder_date,

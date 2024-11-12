@@ -2,15 +2,24 @@
 include "./database.php";
 session_start();
 
-
-$var_appid = $_GET["record"];
-
-
 date_default_timezone_set('Asia/Manila');
 
 $var_crrntTime = date("h:i:sa");
 $var_currntDate = date("Y-m-d");
 // $var_currntDate = "2024-11-09";
+
+$var_appid = $_GET["record"];
+
+if (isset($_POST["session_id"])) {
+    $session_id = $_POST["session_id"];
+
+    $sql = "SELECT * FROM `tbl_session` WHERE session_id = $session_id";
+
+    $result = $var_conn->query($sql)->fetch_assoc();
+
+    echo $result["photo"];
+    exit;
+}
 
 $var_sessionList = "SELECT 
                     	*,
@@ -51,7 +60,8 @@ $var_sessID = "";
 
                     <div class="offcanvas-header">
                         <h5 class="offcanvas-title" id="offcanvasNavbarLabel">
-                            <img src="./assets/img/Logo.jpg" class="rounded-pill shadow" alt="Logo.jpg" width="64" height="64">
+                            <img src="./assets/img/Logo.jpg" class="rounded-pill shadow" alt="Logo.jpg" width="64"
+                                height="64">
                         </h5>
                         <button type="button" class="btn-close shadow" data-bs-dismiss="offcanvas"
                             aria-label="Close"></button>
@@ -60,20 +70,23 @@ $var_sessID = "";
                     <div class="offcanvas-body">
                         <ul class="navbar-nav justify-content-end flex-grow-1 pe-0 gap-0 gap-lg-4">
                             <li class="nav-item">
-                                <a class="nav-link fw-semibold text-center active" aria-current="page" href="./PatientHomePage.php">
+                                <a class="nav-link fw-semibold text-center active" aria-current="page"
+                                    href="./PatientHomePage.php">
                                     <i class="bi bi-house fs-3"></i><br>
                                     <small>Home</small>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link fw-semibold text-center" aria-current="page" href="./PATAppointmentList.php">
+                                <a class="nav-link fw-semibold text-center" aria-current="page"
+                                    href="./PATAppointmentList.php">
                                     <i class="bi bi-calendar-check fs-3"></i><br>
                                     <small>Appointment</small>
                                 </a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link fw-semibold text-center" aria-current="page" href="PatientHistory.php">
+                                <a class="nav-link fw-semibold text-center" aria-current="page"
+                                    href="PatientHistory.php">
                                     <i class="bi bi-clock-history fs-3"></i><br>
                                     <small>History</small>
                                 </a>
@@ -85,13 +98,15 @@ $var_sessID = "";
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link fw-semibold text-center" aria-current="page" href="./PatientChat.php">
+                                <a class="nav-link fw-semibold text-center" aria-current="page"
+                                    href="./PatientChat.php">
                                     <i class="bi bi-chat-dots fs-3 chat-badge"></i><br>
                                     <small>Chat</small>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link fw-semibold text-center" aria-current="page" href="./ProfilePage.php">
+                                <a class="nav-link fw-semibold text-center" aria-current="page"
+                                    href="./ProfilePage.php">
                                     <i class="bi bi-person fs-3"></i><br>
                                     <small>Profile</small>
                                 </a>
@@ -119,7 +134,8 @@ $var_sessID = "";
         </div>
     </div>
 
-    <div class="modal modal-xl fade" id="SessionModal" tabindex="-1" role="dialog" aria-labelledby="SessionModalLabel" aria-hidden="true">
+    <div class="modal modal-xl fade" id="SessionModal" tabindex="-1" role="dialog" aria-labelledby="SessionModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -137,11 +153,17 @@ $var_sessID = "";
                             <label class="mb-1">Images:</label><br>
                             <input type="file" class="form-control" name="FilePoto" multiple accept="image/*" required>
                         </div>
+                        <div class="d-flex justify-content-center align-items-center flex-column d-block mb-3" id="photoContainer">
+                            <small class="fw-semibold mb-2">Session Pictures</small>
+                            <!-- <img src="./UserFiles/SessionPictures/" id="sessionPicturesPreview" class="img-thumbnail" style="height: 250px; width: auto; object-fit: cover;"> -->
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary px-5 rounded-5 shadow" data-bs-dismiss="modal" id="closeSessionModalBtn">Close</button>
-                    <button type="submit" class="btn btn-primary px-5 rounded-5 shadow" form="editSessionForm">Save Changes</button>
+                    <button type="button" class="btn btn-secondary px-5 rounded-5 shadow" data-bs-dismiss="modal"
+                        id="closeSessionModalBtn">Close</button>
+                    <button type="submit" class="btn btn-primary px-5 rounded-5 shadow" form="editSessionForm">Save
+                        Changes</button>
                 </div>
             </div>
         </div>
@@ -155,10 +177,12 @@ $var_sessID = "";
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <button type="button" id="StartSession" class="btn btn-outline-primary px-5 rounded-5 shadow w-100">Start Session</button>
+                    <button type="button" id="StartSession"
+                        class="btn btn-outline-primary px-5 rounded-5 shadow w-100">Start Session</button>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary px-5 rounded-5 shadow" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary px-5 rounded-5 shadow"
+                        data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -191,7 +215,8 @@ $var_sessID = "";
                     ?>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary px-5 rounded-5 shadow" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary px-5 rounded-5 shadow"
+                        data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -205,7 +230,8 @@ $var_sessID = "";
                 <div class="col-lg">
 
                     <div class="mb-3 d-flex justify-content-center align-items-center">
-                        <img id="ProfPic" class="img-fluid rounded-5 shadow" style="height: 250px; width: auto;" src="#" alt="#">
+                        <img id="ProfPic" class="img-fluid rounded-5 shadow" style="height: 250px; width: auto;" src="#"
+                            alt="#">
                     </div>
 
                     <hr>
@@ -232,8 +258,11 @@ $var_sessID = "";
                     <hr>
 
                     <div class="d-flex justify-content-center align-items-center gap-2">
-                        <button type="button" class="btn btn-outline-primary rounded-5 w-100 shadow" id="genCertificateBtn" data-bs-target="#viewCertificateModal" data-bs-toggle="modal" disabled>Generate Certificate</button>
-                        <button type="button" class="btn btn-outline-primary rounded-5 w-100 shadow" id="feedbackBtn">Feedback</button>
+                        <button type="button" class="btn btn-outline-primary rounded-5 w-100 shadow"
+                            id="genCertificateBtn" data-bs-target="#viewCertificateModal" data-bs-toggle="modal"
+                            disabled>Generate Certificate</button>
+                        <button type="button" class="btn btn-outline-primary rounded-5 w-100 shadow"
+                            id="feedbackBtn">Feedback</button>
                     </div>
 
                     <hr class="d-block d-lg-none">
@@ -272,13 +301,13 @@ $var_sessID = "";
 
                             echo "<input name='TxtsessId' value='$var_sessID' hidden>";
                             echo "<button type='button' class='btn btn-outline-primary p-3 w-100 shadow text-start' data-bs-target='#SessionModal' data-bs-toggle='modal' onclick='openSessionModal(`$var_sessID`, `$var_note`)'>
-                            <label><b>Date: </b>$formatted_date_created</label><br>
-                            <label><b>Note: </b>$var_note</label><br>
-                            <label><b>Status: </b>$status</label><br>
-                        </button>";
+                                    <label><b>Date: </b>$formatted_date_created</label><br>
+                                    <label><b>Note: </b>$var_note</label><br>
+                                    <label><b>Status: </b>$status</label><br>
+                                </button>";
                         }
 
-                        if ($index == $num_of_session) {
+                        if ($index >= $num_of_session) {
                             $isDisabled = true;
                         }
 
@@ -297,12 +326,17 @@ $var_sessID = "";
     <script>
         window.addEventListener("DOMContentLoaded", () => {
 
+            const feedbackBtn = document.getElementById("feedbackBtn");
+
+            feedbackBtn.addEventListener("click", () => {
+                window.location.href = "./PatientView.php?feedback=<?php echo $var_appid; ?>";
+            });
 
             const genCertificateBtn = document.getElementById('genCertificateBtn');
 
             <?php
             if ($isDisabled) {
-                echo "genCertificateBtn.disabled = false;";
+                echo "genCertificateBtn.disabled = true;";
             }
             ?>
 
@@ -420,9 +454,31 @@ $var_sessID = "";
             }
         });
 
-        function openSessionModal(sessionId, note) {
+        async function openSessionModal(sessionId, note) {
             editSessionForm.sessionID.value = sessionId;
             editSessionForm.TxtNote.value = note;
+
+            const formData = new FormData();
+            formData.append("session_id", sessionId);
+
+            const response = await fetch("./PatientSessionView.php?record=<?php echo $var_appid; ?>", {
+                method: "POST",
+                body: formData
+            });
+
+            const photos = await response.text();
+            const photosArray = photos.split(",");
+            const photoContainer = document.getElementById("photoContainer");
+
+            for (let photo of photosArray) {
+                photoContainer.innerHTML += `<img src='./UserFiles/SessionPictures/${photo}' class='img-thumbnail' style='height: 250px; width: auto; object-fit: cover; margin-right: 10px; cursor: pointer;'>`;
+            }
+
+            Array.from(photoContainer.getElementsByTagName("img")).forEach((img) => {
+                img.addEventListener("click", (e) => {
+                    window.open(img.src);
+                });
+            });
         }
 
         function showToast(message) {

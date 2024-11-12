@@ -5,14 +5,13 @@ include "./database.php";
 session_start();
 
 $var_therapistsId = $_SESSION["sess_PTID"];
-echo $var_therapistsId ;
+// echo $var_therapistsId;
 date_default_timezone_set('Asia/Manila');
 
 $var_crrntTime = date("h:i:sa");
 $var_currntDate = date("Y-m-d");
 $var_currntDate = "2024-11-13";
 
-$var_validate="";
 $var_filter = "";
 $var_days = array();
 $var_sessionList = "SELECT *, 
@@ -24,8 +23,7 @@ $var_sessionList = "SELECT *,
                         JOIN tbl_user U ON PAT.user_id = U.User_id 
                         JOIN tbl_sched SC ON SC.shed_id = AP.schedle_id
                         WHERE PT.therapist_id = $var_therapistsId
-                        AND AP.status = 'On-Going'
-                        ";
+                        AND AP.status = 'On-Going'";
 $var_Slist = mysqli_query($var_conn, $var_sessionList);
 
 if (isset($_POST["BtnFilter"]) && isset($_POST["RadDay"])) {
@@ -245,21 +243,37 @@ if (isset($_POST["BtnFilter"]) && isset($_POST["RadDay"])) {
                 <div>
                     <h3 class="text-center">Sessions</h3>
                     <table class="table table-striped shadow">
-                        <?php
-                       
-                            while ($var_SSRec = mysqli_fetch_array($var_Slist)) {
-                                // $var_days = explode(",", $var_SSRec["day"]);
-                                ?>
-                                    <tr>
-                                        <td><?php echo $var_SSRec["FULLNAME"]."<br>".
-                                         $var_SSRec["P_case"]."<br>".$var_SSRec["day"]."<br>"
-                                         .$var_SSRec["Date_creadted"]."<br>";?>
-                                         <a href="./TherapistCreateSession.php?record=<?php echo $var_SSRec["appointment_id"]; ?>">check Session</a></td>
-                                    </tr>
-                                <?php
-                            }
-                       
-                        ?>
+                    <?php
+                        while ($var_SSRec = mysqli_fetch_array($var_Slist)) {
+                            $profilePic = $var_SSRec["profilePic"];
+                            $fullname = $var_SSRec["FULLNAME"];
+                            $P_case = $var_SSRec["P_case"];
+                            $day = $var_SSRec["day"];
+                            $Date_creadted = $var_SSRec["Date_creadted"];
+                            $appointment_id = $var_SSRec["appointment_id"];
+                        
+                            echo "
+                                <tr>
+                                    <td>
+                                        <div class='row'>
+                                            <div class='col-3 p-4'>
+                                                <div class='col-sm d-flex justify-content-center align-items-center flex-column gap-3'>
+                                                    <img src='./UserFiles/ProfilePictures/$profilePic' alt='$profilePic' class='rounded-pill shadow' style='object-fit: cover; object-fit-position: top; height: 250px; width: 250px;'>
+                                                </div>
+                                            </div>
+                                            <div class='col border-start d-flex justify-content-center align-items-start flex-column gap-2'>
+                                                <label><b>Patient Full Name: </b>$fullname</label>
+                                                <label><b>Patient Case: </b>$P_case</label>
+                                                <label><b>Days: </b>$day</label>
+                                                <label><b>Date: </b>$Date_creadted</label>
+                                                <a class='btn btn-outline-primary btn-sm px-5 rounded-5 shadow' href='./TherapistCreateSession.php?record=$appointment_id'>Check Session</a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ";
+                        }
+                    ?>
                     </table>
                 </div>
 
@@ -270,12 +284,6 @@ if (isset($_POST["BtnFilter"]) && isset($_POST["RadDay"])) {
     </main>
 
     <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.js"></script>
-    <script>
-        var validate = <?php echo $var_validate?>;
-        if(validate == 0){
-            alert("You Are not validated");
-        }
-    </script>
 </body>
 
 </html>

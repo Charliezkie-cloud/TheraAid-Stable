@@ -10,7 +10,7 @@ $DcodeJSON = json_decode($JSONDATA, true);
 date_default_timezone_set('Asia/Manila');
 $var_crrntTime = date("h:i:sa");
 $var_currntDate = date("Y-m-d");
-// $var_currntDate = "2024-11-09";
+$var_currntDate = "2024-11-15";
 $var_status = "ongoing";
 
 if (isset($DcodeJSON["appId"])) {
@@ -21,7 +21,7 @@ if (isset($DcodeJSON["appId"])) {
             WHERE appointment_id = $appointment_id";
     $results = $var_conn->query($sql);
 
-    if ($results->num_rows < 0) {   
+    if ($results->num_rows < 0) {
         http_response_code(500);
         echo "No item found";
         exit;

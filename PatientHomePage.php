@@ -155,13 +155,19 @@ if (mysqli_num_rows($var_Rqry) > 0) {
                     </div>
                     <hr>
                     <h3 class="text-lg-center">Reminder</h3>
+
                     <div class="reminder d-flex justify-content-start align-items-center flex-column shadow rounded p-3 gap-2" style="height: 250px; overflow-y: auto;">
-                        <div class="bg-primary text-center">
-                            <p><?php echo $var_message."<br>".$var_Rrec["start_time"]."-".$var_Rrec["end_time"];?></p>
-                        </div>
-                        
+                        <?php if ($var_message) : ?>
+                            <div class="w-100 text-center">
+                                <p><?= $var_message . "<br>" . $var_Rrec["start_time"] . "-" . $var_Rrec["end_time"]; ?><hr></p>
+                            </div>
+                        <?php else : ?>
+                            <div class="bg-secondary text-center">
+                                <p>No Session for today</p>
+                            </div>
+                        <?php endif; ?>
                     </div>
-                            
+
                 </div>
 
                 <div class="col-lg mt-3 mt-lg-0">

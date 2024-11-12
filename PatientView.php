@@ -6,6 +6,19 @@ session_start();
 
 $sess_PTID = $_SESSION["sess_PTID"];
 
+$isFeedback = false;
+
+if (isset($_GET["feedback"])) {
+    $appointment_id = $_GET["feedback"];
+
+    $sql = "SELECT * FROM `tbl_appointment` WHERE appointment_id = $appointment_id";
+    $result = $var_conn->query($sql)->fetch_assoc();
+
+    $sess_PTID = $result["therapists_id"];
+
+    $isFeedback = true;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -176,7 +189,7 @@ $sess_PTID = $_SESSION["sess_PTID"];
                             <button type="button" id="sendMessageButton" class="btn btn-primary rounded-5 w-100 mb-2 mb-lg-0 btn-sm">Send Message</button>
                         </div>
                         <div class="col-lg p-0">
-                            <button type="button" class="btn btn-primary rounded-5 w-100 mb-3 mb-lg-0 btn-sm" data-bs-target="#feedbackModal" data-bs-toggle="modal">Send Feedback</button>
+                            <button type="button" class="btn btn-primary rounded-5 w-100 mb-3 mb-lg-0 btn-sm" data-bs-target="#feedbackModal" data-bs-toggle="modal" id="sendFeedbackBtn">Send Feedback</button>
                         </div>
                     </div>
                 </div>
@@ -247,6 +260,10 @@ $sess_PTID = $_SESSION["sess_PTID"];
         var TherapID;
 
         (() => {
+            <?php if ($isFeedback): ?>
+                document.getElementById('sendFeedbackBtn').click()
+            <?php endif ?>
+
             const forms = document.getElementsByClassName("needs-validation");
 
             Array.from(forms).forEach((form) => {
