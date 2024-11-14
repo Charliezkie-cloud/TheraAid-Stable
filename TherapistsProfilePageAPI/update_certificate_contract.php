@@ -9,36 +9,39 @@ $userID = $_SESSION["sess_id"];
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (
         isset($_FILES["certificate"]) &&
-        isset($_FILES["contract"])
+        isset($_POST["contract"])
     ) {
         $certificate = $_FILES["certificate"];
-        $contract = $_FILES["contract"];
+        $contract = $_POST["contract"];
 
         $certificatesDir = "../UserFiles/Certificates";
-        $contractsDir = "../UserFiles/Contracts";
 
         $certificateTmpName = $certificate["tmp_name"];
-        $contractTmpName = $contract["tmp_name"];
 
         $newCertificateName = uniqid() . ".pdf";
-        $newContractName = uniqid() . ".pdf";
 
-        if (move_uploaded_file($certificateTmpName, "$certificatesDir/$newCertificateName") && move_uploaded_file($contractTmpName, "$contractsDir/$newContractName")) {
+        if (move_uploaded_file($certificateTmpName, "$certificatesDir/$newCertificateName")) {
             $sql = "UPDATE tbl_therapists
                     SET
                     	certificate = '$newCertificateName',
-                    	contract = '$newContractName'
+                    	contract = '$contract'
                     WHERE user_id = $userID";
             $result = $var_conn->query($sql);
 
             if ($result) {
+                http_response_code(200);
                 echo "Your certificate and contract has been updated!";
             } else {
-                echo "Something went wrong while uploading your files, please try again.";
+                http_response_code(500);
+                echo "Something went wrong while uploading your updates, please try again.";
             }
         } else {
+            http_response_code(500);
             echo "Something went wrong while uploading your files, please try again.";
         }
+    } else {
+        http_response_code(400);
+        echo "Missing variable, please try again.";
     }
 } else {
     header("location ..");

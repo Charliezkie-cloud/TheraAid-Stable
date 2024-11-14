@@ -80,6 +80,7 @@ if (isset($_POST["BtnSubmit"])) {
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <link rel='stylesheet' type='text/css' media='screen' href='./assets/css/TherapistHomePage.css'>
     <link rel='stylesheet' type='text/css' media='screen' href='./node_modules/leaflet/dist/leaflet.css'>
+    <link rel='stylesheet' type='text/css' media='screen' href='./node_modules/easymde/dist/easymde.min.css'>
 </head>
 
 <body>
@@ -333,21 +334,21 @@ if (isset($_POST["BtnSubmit"])) {
 
                         <div class="mb-3">
                             <label for="firstName" class="mb-1">First Name <span class="text-danger">*</span> <small class="fw-semibold">(Max Length: 50)</small></label>
-                            <input type="text" name="firstName" value="<?php echo $var_Fname; ?>" id="firstName" class="form-control" required>
+                            <input type="text" name="firstName" value="<?php echo $var_Fname; ?>" id="firstName" class="form-control" readonly required>
                             <div class="invalid-feedback">
                                 Please choose a First Name.
                             </div>
                         </div>
                         <div class="mb-3">
                             <label for="middleName" class="mb-1">Middle Name <span class="text-danger">*</span> <small class="fw-semibold">(Max Length: 30)</small></label>
-                            <input type="text" name="middleName" value="<?php echo $var_MI; ?>" id="middleName" class="form-control" required>
+                            <input type="text" name="middleName" value="<?php echo $var_MI; ?>" id="middleName" class="form-control" readonly required>
                             <div class="invalid-feedback">
                                 Please choose a Middle Name.
                             </div>
                         </div>
                         <div class="mb-3">
                             <label for="lastName" class="mb-1">Last Name <span class="text-danger">*</span> <small class="fw-semibold">(Max Length: 50)</small></label>
-                            <input type="text" name="lastName" value="<?php echo $var_Lname; ?>" id="lastName" class="form-control" required>
+                            <input type="text" name="lastName" value="<?php echo $var_Lname; ?>" id="lastName" class="form-control" reaonly required>
                             <div class="invalid-feedback">
                                 Please choose a Last Name.
                             </div>
@@ -499,6 +500,25 @@ if (isset($_POST["BtnSubmit"])) {
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-primary" data-bs-target='#updateContractCertificateModal' data-bs-toggle='modal' data-bs-dismiss='modal'>Update</button>
+                    <button type="button" class="btn btn-danger" data-bs-target='#deleteCertificateOptionModal' data-bs-toggle='modal' data-bs-dismiss='modal'>Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteCertificateOptionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5">Delete Certificate</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Do you wish to delete your certificate? Please be aware that this action is irreversible. Ensure that you save a copy of your certificate before proceeding with deletion.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-bs-target='#viewCertificateModal' data-bs-toggle='modal' data-bs-dismiss="modal" id="deleteCertificateButton">Yes</button>
+                    <button type="button" class="btn btn-danger" data-bs-target='#viewCertificateModal' data-bs-toggle='modal' data-bs-dismiss="modal">No</button>
                 </div>
             </div>
         </div>
@@ -515,7 +535,7 @@ if (isset($_POST["BtnSubmit"])) {
                     <?php
 
                     if ($contract !== null) {
-                        echo "<embed src='./UserFiles/Contracts/$contract' class='border-0 w-100' style='height: 100vh;'/>";
+                        echo "<div id='contractPreviewContainer'></div>";
                     } else {
                         echo "<div class='d-flex justify-content-center align-items-center flex-column gap-3 py-2'>
                             <h3>Oops! Looks like you haven't uploaded a file yet</h3>
@@ -542,17 +562,14 @@ if (isset($_POST["BtnSubmit"])) {
                 </div>
                 <div class="modal-body">
                     <form class="needs-validation" id="updateContractCertificateForm" novalidate>
-
-                        <p><b>Note: </b>Kindly refrain from uploading files in any format other than PDF.</p>
-
                         <div class="mb-3">
-                            <label class="mb-1 fw-semibold">Certificate:</label><br>
+                            <label class="mb-1">Certificate: <span class="fw-semibold">(Kindly refrain from uploading files in any format other than PDF.)</span></label><br>
                             <input type="file" name="certificate" accept="application/pdf" class="form-control" required>
                         </div>
 
                         <div class="mb-3">
-                            <label class="mb-1 fw-semibold">Contract:</label><br>
-                            <input type="file" name="contract" accept="application/pdf" class="form-control" required>
+                            <label class="mb-1">Contract: <span class="fw-semibold">(Minimum words: 10)</span></label><br>
+                            <textarea class="form-control" name="contract" id="contractTextbox" required></textarea>
                         </div>
 
                     </form>
@@ -685,8 +702,48 @@ if (isset($_POST["BtnSubmit"])) {
 
     <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.js"></script>
     <script src='./node_modules/leaflet/dist/leaflet.js'></script>
+    <script src='./node_modules/easymde/dist/easymde.min.js'></script>
+    <script src='./node_modules/markdown-it/dist/markdown-it.min.js'></script>
     <script>
-        window.onload = () => {
+        const markdown = window.markdownit();
+
+        let contractTextbox;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const deleteCertificateButton = document.getElementById("deleteCertificateButton");
+
+            deleteCertificateButton.addEventListener("click", async () => {
+                const formData = new FormData();
+                formData.append("userID", "<?php echo $var_profid ?>");
+
+                const response = await fetch("./TherapistsProfilePageAPI/delete_certificate.php", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const responseText = await response.text();
+
+                showToast(responseText);
+
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            });
+
+            (async () => {
+                const response = await fetch("./TherapistsProfilePageAPI/get_contract.php?userID=<?php echo $var_profid; ?>");
+
+                const responseText = await response.text();
+
+                if (document.getElementById("contractPreviewContainer")) {
+                    const contractPreviewContainer = document.getElementById("contractPreviewContainer");
+
+                    contractPreviewContainer.innerHTML = markdown.render(responseText);
+                }
+            })();
+
+            contractTextbox = new EasyMDE({element: document.getElementById('contractTextbox')});
+
             const viewPasswordButton = document.getElementsByClassName("viewPasswordButton");
 
             Array.from(viewPasswordButton).forEach((button) => {
@@ -1034,14 +1091,14 @@ if (isset($_POST["BtnSubmit"])) {
                 e.stopPropagation();
 
                 const certificate = updateContractCertificateForm.certificate.files[0];
-                const contract = updateContractCertificateForm.contract.files[0];
+                const contract = contractTextbox.value();
 
                 const formData = new FormData();
                 formData.append("certificate", certificate, certificate.name);
-                formData.append("contract", contract, contract.name);
+                formData.append("contract", contract);
 
-                if (contract.name.split(".").indexOf("pdf") < 0 || certificate.name.split(".").indexOf("pdf") < 0) {
-                    return showToast("All file submissions must be in PDF format only.");
+                if (contract.split(" ").length < 10 || certificate.name.split(".").indexOf("pdf") < 0) {
+                    return showToast("Kindly adhere to the provided instructions for each input.");
                 }
 
                 const response = await fetch("./TherapistsProfilePageAPI/update_certificate_contract.php", {
@@ -1052,8 +1109,14 @@ if (isset($_POST["BtnSubmit"])) {
                 const responseText = await response.text();
 
                 showToast(responseText);
+
+                if (response.status === 200) {
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                }
             });
-        }
+        });
 
         function formatCurrency(value) {
             value = value.replace(/[^\d.-]/g, '');

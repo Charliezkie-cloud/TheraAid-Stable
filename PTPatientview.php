@@ -7,21 +7,23 @@ session_start();
 $var_APID = $_SESSION["sess_ApntmntId"];
 $var_profid = $_SESSION["sess_PID"];
 $var_qry = "SELECT u.User_id,
-            u.Fname,
-            u.Lname,
-            u.Mname,
-            u.Bday,
-            u.ContactNum,
-            u.Email,
-            u.profilePic,
-            p.P_case,
-            p.case_desc,
-            p.City,
-            p.barangay,
-            p.assement_photo,
-            p.mid_hisotry_photo
-        FROM tbl_user u JOIN tbl_patient p ON u.User_id = p.user_id
-        WHERE p.patient_id  ='$var_profid';";
+                u.Fname,
+                u.Lname,
+                u.Mname,
+                u.Bday,
+                u.ContactNum,
+                u.Email,
+                u.profilePic,
+                p.P_case,
+                p.case_desc,
+                p.City,
+                p.barangay,
+                p.assement_photo,
+                p.mid_hisotry_photo,
+                appointment.*
+            FROM tbl_user u JOIN tbl_patient p ON u.User_id = p.user_id
+            JOIN tbl_appointment appointment ON appointment.patient_id = p.patient_id
+            WHERE p.patient_id  = $var_profid";
 $var_chk = mysqli_query($var_conn, $var_qry);
 $var_Fname = "";
 $var_Lname = "";
@@ -59,6 +61,7 @@ if (mysqli_num_rows($var_chk) > 0) {
     $var_UID = $var_get["User_id"];
     $var_Age = $var_year - $var_byear;
     $profilePic = $var_get["profilePic"];
+    $status = $var_get["status"];
 } else {
     echo "No records found";
 }
@@ -255,12 +258,14 @@ if (isset($_POST["BTNDecline"])) {
 
                         <hr>
 
-                        <form id="declineForm" method="post" action="./PTPatientview.php" hidden></form>
+                        <?php if ($status === "Pending"): ?>
+                            <form id="declineForm" method="post" action="./PTPatientview.php" hidden></form>
 
-                        <div class="d-flex justify-content-center justify-content-lg-start align-items-center mt-3 flex-row gap-1 p-3 bg-secondary bg-opacity-50 shadow rounded">
-                            <button type="submit" class="btn btn-secondary px-5 px-lg-3 rounded-5" name="BTNDecline" form="declineForm">Cancel</button>
-                            <button type="button" class="btn btn-primary px-5 px-lg-3 rounded-5 fw-semibold" data-bs-toggle="modal" data-bs-target="#mainModal">Accept</button>
-                        </div>
+                            <div class="d-flex justify-content-center justify-content-lg-start align-items-center mt-3 flex-row gap-1 p-3 bg-secondary bg-opacity-50 shadow rounded">
+                                <button type="submit" class="btn btn-secondary px-5 px-lg-3 rounded-5" name="BTNDecline" form="declineForm">Cancel</button>
+                                <button type="button" class="btn btn-primary px-5 px-lg-3 rounded-5 fw-semibold" data-bs-toggle="modal" data-bs-target="#mainModal">Accept</button>
+                            </div>
+                        <?php endif; ?>
 
                     </div>
 

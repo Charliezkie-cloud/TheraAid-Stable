@@ -180,9 +180,7 @@ $var_qry = mysqli_query($var_conn, $var_sclt);
                         <th>Status</th>
                         <th>Date Created</th>
                         <th>Rate</th>
-                        <?php if ($var_filter == "P"): ?>
-                            <th>Patient Profile</th>
-                        <?php endif; ?>
+                        <th>Patient Profile</th>
                         <?php if ($var_filter == "R"): ?>
                             <th>Action</th>
                         <?php endif; ?>
@@ -197,7 +195,13 @@ $var_qry = mysqli_query($var_conn, $var_sclt);
                                 <td><?php echo $var_rec["status"]; ?></td>
                                 <td><?php echo $var_rec["Date_creadted"]; ?></td>
                                 <td><?php echo $var_rec["rate"]; ?></td>
-                                <?php if ($var_filter == "R") { ?>
+                                <?php if ($var_filter == "R"): ?>
+                                    <td>
+                                        <form method="POST" action="TherapistsAppointment.php">
+                                            <input type="hidden" name="appointment_id" value="<?php echo $var_rec['appointment_id']; ?>">
+                                            <button type="submit" name="PatientProf" class="btn btn-primary px-5 rounded-5 w-100 btn-sm" value="<?php echo $var_rec['patient_id']; ?>">View</button>
+                                        </form>
+                                    </td>
                                     <td>
                                         <form method="POST" action="TherapistsAppointment.php">
                                             <input type="hidden" name="appointment_id"
@@ -207,22 +211,20 @@ $var_qry = mysqli_query($var_conn, $var_sclt);
                                                 value="<?php echo $_SESSION["sess_PTID"]; ?>">Cancel</button>
                                         </form>
                                     </td>
-                                <?php } ?>
-                                <?php if ($var_filter == "P") { ?>
+                                <?php endif; ?>
+                                <?php if (($var_filter === "P") || $var_filter === "O"): ?>
                                     <td>
                                         <form method="POST" action="TherapistsAppointment.php">
-                                            <input type="hidden" name="appointment_id"
-                                                value="<?php echo $var_rec['appointment_id']; ?>">
-                                            <button type="submit" name="PatientProf" class="btn btn-primary px-5 rounded-5 w-100 btn-sm"
-                                                value="<?php echo $var_rec['patient_id']; ?>">View</button>
+                                            <input type="hidden" name="appointment_id" value="<?php echo $var_rec['appointment_id']; ?>">
+                                            <button type="submit" name="PatientProf" class="btn btn-primary px-5 rounded-5 w-100 btn-sm" value="<?php echo $var_rec['patient_id']; ?>">View</button>
                                         </form>
                                     </td>
-                                <?php } ?>
+                                <?php endif; ?>
                             </tr>
                         <?php endwhile; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="<?php echo ($var_filter == "P" ? 7 : 6); ?>">No records found.</td>
+                            <td colspan="100">No records found.</td>
                         </tr>
                     <?php endif; ?>
                 </table>

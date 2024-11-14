@@ -4,6 +4,16 @@ include "../database.php";
 
 session_start();
 
+function deleteFeedbackForm($feedbackID, $recipientID) {
+    $userID = $_SESSION["sess_id"];
+
+    if ($userID === $recipientID) {
+        return "<form class='deleteFeedbackForm'>
+                <button type='submit' class='btn btn-outline-danger btn-sm rounded-5 shadow ms-2' name='feedbackID' value='$feedbackID'>Delete</button>
+            </form>";
+    }
+}
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (isset($_POST["therapist_id"])) {
         $therapist_id = $_POST["therapist_id"];
@@ -17,22 +27,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 JOIN tbl_user user ON patient.user_id = user.User_id 
                 WHERE feedback.receiver_id = $therapist_id";
         $results = $var_conn->query($sql);
-       
+
         if ($results->num_rows > 0) {
             foreach ($results as $result) {
-                
+
+                $feedbackID = $result["feedback_id"];
+                $recipientID = $result["User_id"];
                 $profilePicture = $result["profilePic"];
                 $fullName = $result["fullName"];
                 $message = $result["message"];
                 $var_star = $result["stars"];
                 $formatted_date_created = $result["formatted_date_created"];
-                
+
+                $deleteFeedbackForm = deleteFeedbackForm($feedbackID, $recipientID);
+
                 echo "<div class='shadow bg-body-secondary rounded-5 p-3 mb-3'>
                         <div class='mb-3'>
                             <div class='row'>
                                 <div class='col-lg mb-2 mb-lg-0 d-flex justify-content-start align-items-center flex-row'>
                                     <img src='./UserFiles/ProfilePictures/$profilePicture' alt='$profilePicture' class='img-fluid rounded-pill shadow' style='height: 48px; width: 48px; object-fit: cover;'>
                                     <label class='ms-2'><b>$fullName</b></label>
+                                    $deleteFeedbackForm
                                 </div>
                                 <div class='col-lg d-flex justify-content-start justify-content-lg-end align-items-center'>
                                     <small>$formatted_date_created</small>
@@ -40,23 +55,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             </div>
                         </div>
                         <div class='mb-3'>
-                            <div class='d-flex justify-content-start align-items-start flex-row gap-2 fs-4'>
-";
-                        for($var_i=0;$var_i < $var_star;$var_i++){
+                            <div class='d-flex justify-content-start align-items-start flex-row gap-2 fs-4'>";
+
+                            for ($var_i = 0;$var_i < $var_star;$var_i++) {
                                 echo "<i class='bi bi-star-fill text-warning'></i>";
-                                
-
-                        }
-                        $vacant_stars =5-$var_star;
+                            }
                         
-                        for($var_j=0;$var_j < $vacant_stars;$var_j++){
-                            echo '<i class="bi bi-star text-warning"></i>';
-                            
-
-                         }
-
-                            
-                 echo"     
+                            $vacant_stars = 5 - $var_star;
+                        
+                            for ($var_j = 0;$var_j < $vacant_stars;$var_j++) {
+                                echo '<i class="bi bi-star text-warning"></i>';
+                            }
+                echo "
                          </div>
                        </div>
                         <div>

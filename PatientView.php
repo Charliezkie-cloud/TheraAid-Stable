@@ -318,11 +318,15 @@ if (isset($_GET["feedback"])) {
                 });
             
                 const responseText = await response.text();
-                const responseStatus = response.status;
-            
-                console.log(responseStatus);
-            
+                const status = response.status;
+
                 showToast(responseText);
+
+                if (status === 200) {
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                }
             });
         })();
 
@@ -373,6 +377,36 @@ if (isset($_GET["feedback"])) {
             const feedbackContainer = document.getElementById("feedbackContainer");
 
             feedbackContainer.innerHTML = responseText;
+
+            const deleteForms = feedbackContainer.getElementsByClassName("deleteFeedbackForm");
+            
+            Array.from(deleteForms).forEach((form) => {
+                form.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const feedbackID = form.feedbackID.value;
+
+                    const formData = new FormData();
+                    formData.append("feedbackID", feedbackID);
+
+                    const response = await fetch("./FeedbackAPI/delete_feedback.php", {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    const responseText = await response.text();
+                    const status = response.status;
+
+                    showToast(responseText);
+
+                    if (status === 200) {
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    }
+                });
+            });
         }
 
         async function GetSched(TherapID) {

@@ -347,21 +347,21 @@ if (isset($_POST["BtnSubmit"])) {
 
                         <div class="mb-3">
                             <label for="firstName" class="mb-1">First Name <span class="text-danger">*</span> <small class="fw-semibold">(Max Length: 50)</small></label>
-                            <input type="text" name="firstName" id="firstName" value="<?php echo $var_Fname ?>" class="form-control" required>
+                            <input type="text" name="firstName" id="firstName" value="<?php echo $var_Fname ?>" class="form-control" readonly required>
                             <div class="invalid-feedback">
                                 Please choose a First Name.
                             </div>
                         </div>
                         <div class="mb-3">
                             <label for="middleName" class="mb-1">Middle Name <span class="text-danger">*</span> <small class="fw-semibold">(Max Length: 30)</small></label>
-                            <input type="text" name="middleName" id="middleName" value="<?php echo $var_Mname ?>" class="form-control" required>
+                            <input type="text" name="middleName" id="middleName" value="<?php echo $var_Mname ?>" class="form-control" readonly required>
                             <div class="invalid-feedback">
                                 Please choose a Middle Name.
                             </div>
                         </div>
                         <div class="mb-3">
                             <label for="lastName" class="mb-1">Last Name <span class="text-danger">*</span> <small class="fw-semibold">(Max Length: 50)</small></label>
-                            <input type="text" name="lastName" id="lastName" value="<?php echo $var_Lname ?>" class="form-control" required>
+                            <input type="text" name="lastName" id="lastName" value="<?php echo $var_Lname ?>" class="form-control" readonly required>
                             <div class="invalid-feedback">
                                 Please choose a Last Name.
                             </div>

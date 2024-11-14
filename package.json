@@ -12,6 +12,11 @@
   "dependencies": {
     "bootstrap": "^5.3.3",
     "chart.js": "^4.4.6",
-    "leaflet": "^1.9.4"
+    "easymde": "^2.18.0",
+    "leaflet": "^1.9.4",
+    "markdown-it": "^14.1.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3"
   }
 }

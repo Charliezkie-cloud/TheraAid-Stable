@@ -9,6 +9,41 @@ if(isset($_SESSION["appointment_id"])){
     $var_appid = $_SESSION["appointment_id"];
 }
 
+if (isset($_FILES["health_plan"])) {
+    $healthPlan = $_FILES["health_plan"];
+
+    $healthPlanName = $healthPlan["name"];
+
+    $healthPlanNewName = uniqid() . "." . pathinfo($healthPlanName, PATHINFO_EXTENSION);
+    $healthPlanTmpName = $healthPlan["tmp_name"];
+
+    if (move_uploaded_file($healthPlanTmpName, "./UserFiles/SessionHealthPlan/$healthPlanNewName")) {
+        $sql = "UPDATE tbl_appointment
+                SET health_plan = '$healthPlanNewName'
+                WHERE appointment_id = $var_appid";
+        $result = $var_conn->query($sql);
+
+        if ($result) {
+            http_response_code(200);
+            echo "Your health plan has been uploaded!";
+            exit;
+        } else {
+            http_response_code(500);
+            echo "Something went wrong while uploading health plan, please try again.";
+            exit;
+        }
+    } else {
+        http_response_code(400);
+        echo "Something went wrong while uploading health plan, please try again.";
+        exit;
+    }
+}
+
+$sql = "SELECT * FROM tbl_appointment WHERE appointment_id = $var_appid";
+$result = $var_conn->query($sql)->fetch_assoc();
+
+$healthPlan = $result["health_plan"];
+
 if (isset($_POST["session_id"])) {
     $session_id = $_POST["session_id"];
 
@@ -206,7 +241,7 @@ $var_sessID = "";
         </div>
     </div>
 
-    <div class="modal fade" id="viewCertificateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal modal-xl fade" id="viewCertificateModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -234,6 +269,39 @@ $var_sessID = "";
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary px-5 rounded-5 shadow" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal modal-xl fade" id="healthPlanModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5">Upload Health Plan</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="healthPlanForm" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label class="mb-1">Health Plan: <span class="fw-semibold">(Kindly refrain from uploading files in any format other than PDF.)</span></label>
+                            <input type="file" name="healthPlan" id="healthPlan" accept="application/pdf" class="form-control" required>
+                        </div>
+                        <?php if ($healthPlan !== null): ?>
+                            <div class="d-flex justify-content-center align-items-center flex-column d-block mb-3">
+                                <small class="fw-semibold mb-2">Health Plan Preview</small>
+                                <embed src='./UserFiles/SessionHealthPlan/<?= $healthPlan ?>' id="healthPlanPreview" class='border-0 w-100' style='height: 100vh;'/>";
+                            </div>
+                        <?php else: ?>
+                            <div class='d-flex justify-content-center align-items-center flex-column gap-3 py-2'>
+                                <h3>Oops! Looks like you haven't uploaded a health plan yet</h3>
+                            </div>
+                        <?php endif; ?>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary px-5 rounded-5 shadow" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-secondary px-5 rounded-5 shadow" form="healthPlanForm">Upload</button>
                 </div>
             </div>
         </div>
@@ -273,7 +341,14 @@ $var_sessID = "";
 
                     <hr>
 
-                    <button type="button" class="btn btn-outline-primary rounded-5 w-100 shadow" id="genCertificateBtn" data-bs-target="#viewCertificateModal" data-bs-toggle="modal" disabled>Generate Certificate</button>
+                    <div class="row gap-2">
+                        <div class="col m-0 p-0">
+                            <button type="button" class="btn btn-outline-primary rounded-5 w-100 shadow" id="genCertificateBtn" data-bs-target="#viewCertificateModal" data-bs-toggle="modal" disabled>Generate Certificate</button>
+                        </div>
+                        <div class="col m-0 p-0">
+                            <button type="button" class="btn btn-outline-primary rounded-5 w-100 shadow" data-bs-target="#healthPlanModal" data-bs-toggle="modal">Health Plan</button>
+                        </div>
+                    </div>
 
                     <hr class="d-block d-lg-none">
 
@@ -335,7 +410,6 @@ $var_sessID = "";
     <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.js"></script>
     <script>
          window.addEventListener("DOMContentLoaded", () => {
-
             const imgs = document.getElementsByTagName("img");
 
             Array.from(imgs).forEach((img) => {
@@ -467,6 +541,37 @@ $var_sessID = "";
                     console.log(err);
                 }
             }
+
+            const healthPlanForm = document.getElementById("healthPlanForm");
+
+            healthPlanForm.addEventListener("submit", async (e) => {
+                if (!healthPlanForm.checkValidity()) {
+                    return;
+                }
+
+                e.preventDefault();
+                e.stopPropagation();
+
+                const healthPlan = healthPlanForm.healthPlan.files[0];
+
+                const formData = new FormData();
+                formData.append("health_plan", healthPlan, healthPlan.name);
+
+                const response = await fetch("./TherapistCreateSession.php", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const responseText = await response.text();
+
+                showToast(responseText);
+
+                if (response.status === 200) {
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                }
+            });
         });
 
         async function openSessionModal(sessionId, note) {

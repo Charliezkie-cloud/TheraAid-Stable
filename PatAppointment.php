@@ -287,13 +287,15 @@ if (isset($_POST["BtnSubmit"])) {
                         *
                     FROM tbl_sched sched
                     JOIN tbl_therapists therapist ON therapist.therapist_id = sched.therapists_id
+                    JOIN tbl_user user ON user.User_id = therapist.user_id
                     WHERE sched.shed_id = $var_SchedID";
                 $result = $var_conn->query($sql);
 
                 if ($result->num_rows > 0 && $rows = $result->fetch_assoc()) {
                     $contract = $rows["contract"];
+
                     if ($contract !== null) {
-                        echo "<embed src='./UserFiles/Contracts/$contract' class='border-0 w-100' style='height: 100vh;'/>";
+                        echo "<div id='contractPreviewContainer'></div>";
                     } else {
                         echo "<b>This therapist has not yet uploaded a contract. :(</b>";
                     }
@@ -304,12 +306,11 @@ if (isset($_POST["BtnSubmit"])) {
 
                 <div class="mb-3">
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" value="1" name="Radcntract" id="agree" required>
-                        <label class="form-check-label" for="agree">Agree</label>
-                    </div>
-                    <div class="form-check mb-3">
-                        <input class="form-check-input" type="radio" value="0" name="Radcntract" id="disgaree" required>
-                        <label class="form-check-label" for="disgaree">Disagree</label>
+                        <input class="form-check-input" type="checkbox" value="1" name="Radcntract" id="agree" required>
+                        <label class="form-check-label" for="agree">I Agree</label>
+                        <div class="invalid-feedback">
+                            Kindly review and accept the therapist contract.
+                        </div>
                     </div>
                 </div>
 
@@ -321,9 +322,17 @@ if (isset($_POST["BtnSubmit"])) {
     </main>
 
     <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.js"></script>
+    <script src='./node_modules/markdown-it/dist/markdown-it.min.js'></script>
     <script>
-        (() => {
+        const markdown = window.markdownit();
 
+        (() => {
+            if (document.getElementById("contractPreviewContainer")) {
+                const contractPreviewContainer = document.getElementById("contractPreviewContainer");
+
+                contractPreviewContainer.innerHTML = markdown.render(`<?php echo $contract; ?>`);
+            }
+            
             const forms = document.getElementsByClassName("needs-validation");
 
             Array.from(forms).forEach((form) => {
